@@ -1,5 +1,14 @@
 {
   "projects": {
-    "default": "next-redux-firebase-demo"
+    "default": "deadpan-live"
+  },
+  "targets": {
+    "deadpan-live": {
+      "hosting": {
+        "app": [
+          "deadpan"
+        ]
+      }
+    }
   }
 }

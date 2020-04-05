@@ -8,6 +8,22 @@
           ".read": true
         }
       }
+    },
+    "space": {
+      "$sid": {
+        ".read": true,
+        "faces": {
+          "$uid": {
+            ".write": "$uid === auth.uid"
+          }
+        }
+      }
+    },
+    "face": {
+      "$uid": {
+        ".read": true,
+        ".write": "$uid === auth.uid"
+      }
     }
   }
 }

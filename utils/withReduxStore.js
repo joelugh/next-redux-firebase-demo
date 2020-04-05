@@ -1,6 +1,6 @@
 import React from 'react'
 import {configureStore, initialState} from '../redux/configureStore'
-import { setConfigVars } from '../config';
+// import { setConfigVars } from '../config';
 import _ from 'lodash'
 
 const isServer = typeof window === 'undefined'
@@ -49,8 +49,8 @@ export default (App) => {
 
     constructor(props) {
       super(props)
-      const config = _.get(props, 'query.config')
-      if (config) setConfigVars(config) // only set config if it exists
+      // const config = _.get(props, 'query.config')
+      // if (config) setConfigVars(config) // only set config if it exists
       this.reduxStore = getOrCreateStore(props.initialReduxState)
     }
 

@@ -4,8 +4,6 @@ import Document, { Head, Main, NextScript } from 'next/document'
 import { ServerStyleSheets } from '@material-ui/styles';
 import theme from '../utils/theme';
 
-import config from '../config';
-
 class MyDocument extends Document {
     render () {
         return (
@@ -20,6 +18,7 @@ class MyDocument extends Document {
                     <link rel="manifest" href="/static/favicon/site.webmanifest"></link>
                     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500' />
                     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+                    <script src="face-api.js"></script>
                 </Head>
                 <body>
                     <Main />

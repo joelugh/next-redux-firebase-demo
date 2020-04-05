@@ -42,29 +42,75 @@ export const getDB = () => getFirebase().database();
 
 export const getAuth = () => getFirebase().auth();
 
+export const signOut = async (space) => {
+  const auth = getAuth();
+  const uid = auth.currentUser.uid;
+  if (space && uid) {
+    const spaceRef = getDB().ref(`space/${space}/faces/${uid}`);
+    await spaceRef.remove();
+  }
+  auth.signOut()
+}
+
+export const signInWithGoogle = async (space) => {
+
+  const auth = getAuth();
+  const uid = auth.currentUser.uid;
+  if (space && uid) {
+    const spaceRef = getDB().ref(`space/${space}/faces/${uid}`);
+    await spaceRef.remove();
+  }
+
+  auth.signInWithPopup(GoogleProvider).then(function(result) {
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    var token = result.credential.accessToken;
+    // The signed-in user info.
+    var user = result.user;
+    // ...
+  }).catch(function(error) {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    // The email of the user's account used.
+    var email = error.email;
+    // The firebase.auth.AuthCredential type that was used.
+    var credential = error.credential;
+    // ...
+  });
+}
+
 getAuth().onAuthStateChanged(_user => {
   if (_user) {
     const providerUser = {
       id: _user.uid,
-      name: _user.displayName,
+      name: _user.displayName || "Anon Ymous",
       email: _user.email,
       emailVerified: _user.emailVerified,
       photo: _user.photoURL,
       created: _user.metadata.creationTime,
       last: _user.metadata.lastSignInTime,
+      isAnonymous: _user.isAnonymous,
     }
     console.log('providerUser', providerUser);
 
     const userRef = getDB().ref(`users/${providerUser.id}`);
-      userRef.once('value', snapshot => {
-          const user = snapshot.val();
-          userRef.update({
-              ...(user || {}),
-              ...providerUser,
-          });
-      });
-
+    userRef.once('value', snapshot => {
+        const user = snapshot.val();
+        userRef.update({
+            ...(user || {}),
+            ...providerUser,
+        });
+    });
+  } else {
+    getAuth().signInAnonymously().catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+      // ...
+    });
   }
+
 });
 
 

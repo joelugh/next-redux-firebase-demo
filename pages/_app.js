@@ -67,7 +67,7 @@ class _App extends App {
         return (
             <>
                 <Head>
-                    <title>Next-Redux-Firebase-Demo</title>
+                    <title>Deadpan</title>
                 </Head>
                 <ThemeProvider theme={theme}>
                     <CssBaseline />

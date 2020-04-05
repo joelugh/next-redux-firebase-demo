@@ -1,42 +1,63 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useFirebaseConnect } from 'react-redux-firebase';
-import { Button } from '@material-ui/core';
-import { getAuth, GoogleProvider } from '../_firebase';
+import { useFirebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase';
+import Router, { useRouter } from 'next/router'
+import shortid from 'shortid';
+
+import { Button, LinearProgress } from '@material-ui/core';
+import { getAuth, GoogleProvider, getDB } from '../_firebase';
+import useScript from '../utils/useScript';
+import Header from '../components/Header';
+import Webcam from '../components/Webcam';
+import Faces from '../components/Faces';
+
+
 
 function Index() {
+
+    const router = useRouter();
+    const { space } = router.query;
+
+    console.log('space', space);
+
+    const routerLoaded = router && router.query;
+    const isClient = typeof window !== 'undefined';
+    const isValidSpace = space && shortid.isValid(space);
 
     const auth = useSelector(state => state.firebase.auth);
     const user = useSelector(state => state.firebase.profile);
 
-    console.log('auth', auth); /* {isLoaded: false, isEmpty: true} */
-    console.log('user', user); /* {isLoaded: true, isEmpty: true} */
+    const isAuthenticated = isLoaded(user) && !isEmpty(user);
 
-    return <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
-        <h1>Hello{user.name ? ` ${user.name}` : ''}!</h1>
-        <Button
-            color="inherit"
-            variant="outlined"
-            onClick={() => {
-                getAuth().signInWithPopup(GoogleProvider).then(function(result) {
-                    // This gives you a Google Access Token. You can use it to access the Google API.
-                    var token = result.credential.accessToken;
-                    // The signed-in user info.
-                    var user = result.user;
-                    // ...
-                }).catch(function(error) {
-                    // Handle Errors here.
-                    var errorCode = error.code;
-                    var errorMessage = error.message;
-                    // The email of the user's account used.
-                    var email = error.email;
-                    // The firebase.auth.AuthCredential type that was used.
-                    var credential = error.credential;
-                    // ...
-                });
-            }}
-        >Sign In</Button>
-    </div>;
+    const [loaded, error] = useScript('/face-api.js');
+
+    React.useEffect(() => {
+        if (loaded && routerLoaded && isClient && !isValidSpace) {
+            Router.push({
+                pathname: '/',
+                query: { space: shortid.generate() },
+            });
+        }
+    }, [router, space, loaded]);
+
+
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            const connectedRef = getDB().ref(`space/${space}/faces/${user.id}`);
+            connectedRef.set(true)
+            connectedRef.onDisconnect().remove();
+        }
+    }, [user])
+
+    if(!isLoaded(user) || !isValidSpace) return <LinearProgress color="secondary" />;
+
+    return <>
+        <Header space={space} />
+        <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+            <Faces id={space} />
+        </div>
+        {loaded && isAuthenticated && <Webcam id={space}/>}
+    </>
 
 }
 
